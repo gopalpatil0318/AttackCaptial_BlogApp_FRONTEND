@@ -13,12 +13,10 @@ import axios from "axios";
 import { FaPaperclip } from "react-icons/fa";
 
 // Dynamically import TinyMCE Editor
-const Editor = dynamic(
-  () => import("@tinymce/tinymce-react").then((mod) => mod.Editor),
-  {
-    ssr: false,
-  }
-);
+// @ts-expect-error: Dynamic import may cause type issues
+const Editor = dynamic(() => import("@tinymce/tinymce-react").then((mod) => mod.Editor), {
+  ssr: false,
+});
 
 export default function CreatePost() {
   const [title, setTitle] = useState("");
@@ -55,17 +53,17 @@ export default function CreatePost() {
       );
       toast({
         title: "Post Created Successfully",
-        description:
-          response.data.message || "Your blog post has been created!",
+        description: response.data.message || "Your blog post has been created!",
       });
       router.push("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "An error occurred while creating the post.";
       toast({
         variant: "destructive",
         title: "Error Creating Post",
-        description:
-          error.response?.data?.message ||
-          "An error occurred while creating the post.",
+        description: errorMessage,
       });
     }
   };
@@ -73,7 +71,7 @@ export default function CreatePost() {
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
       <Header />
-      <main className="flex-grow flex   px-4 py-12">
+      <main className="flex-grow flex px-4 py-12">
         <Card className="w-full mx-10 bg-black text-white rounded-lg shadow-lg">
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-10">
@@ -109,13 +107,11 @@ export default function CreatePost() {
                     >
                       Thumbnail
                     </label>
-
-                    
                     <div
                       className="flex items-center bg-black border-gray-700 text-white w-full p-2 rounded-md cursor-pointer"
                       onClick={() =>
                         document.getElementById("thumbnail")?.click()
-                      } 
+                      }
                     >
                       <FaPaperclip className="h-6 w-6 text-yellow-400 mr-2" />
                       <Input
@@ -124,7 +120,7 @@ export default function CreatePost() {
                         onChange={(e) =>
                           setThumbnail(e.target.files?.[0] || null)
                         }
-                        className="bg-black border-0 text-white placeholder-gray-500 w-full hidden" 
+                        className="bg-black border-0 text-white placeholder-gray-500 w-full hidden"
                         required
                       />
                       <span className="text-gray-500">Choose a file...</span>

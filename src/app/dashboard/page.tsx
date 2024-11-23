@@ -9,9 +9,14 @@ import Footer from '@/components/Footer';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Plus, MoreVertical, Edit, Trash } from 'lucide-react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useToast } from '@/hooks/use-toast';
-import Link from 'next/link';
+
+interface AxiosErrorResponse {
+  message?: string;
+}
+
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,14 +54,12 @@ export default function UserDashboard() {
   };
 
   const fetchUserBlogs = async () => {
-    if (!user._id) return;
-
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/blog/getAuthorBlogs?author=${user._id}`,
         { withCredentials: true }
       );
-
+  
       if (response.data.success) {
         setBlogs(response.data.blogs);
         toast({
@@ -68,9 +71,10 @@ export default function UserDashboard() {
         });
       }
       setLoading(false);
-    } catch (error: any) {
-      console.log(error);
-      const errorMessage = error.response?.data?.message || 'An error occurred during fetching blogs.';
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<AxiosErrorResponse>;
+      const errorMessage =
+        axiosError.response?.data?.message || 'An error occurred during fetching blogs.';
       toast({
         variant: 'destructive',
         title: 'Error Fetching Blogs',
@@ -78,11 +82,7 @@ export default function UserDashboard() {
       });
     }
   };
-
-  const handleEdit = (postId: string) => {
-    router.push(`/dashboard/edit-blog/${postId}`);
-  };
-
+  
   const handleDelete = async (postId: string) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
@@ -90,7 +90,7 @@ export default function UserDashboard() {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/blog/delete/${postId}`,
           { withCredentials: true }
         );
-
+  
         if (response.data.success) {
           setBlogs(blogs.filter(blog => blog._id !== postId));
           toast({
@@ -103,9 +103,10 @@ export default function UserDashboard() {
             description: response.data.message || 'An error occurred while deleting the blog.',
           });
         }
-      } catch (error: any) {
-        console.log(error);
-        const errorMessage = error.response?.data?.message || 'An error occurred while deleting the blog.';
+      } catch (error: unknown) {
+        const axiosError = error as AxiosError<AxiosErrorResponse>;
+        const errorMessage =
+          axiosError.response?.data?.message || 'An error occurred during deleting the blog.';
         toast({
           variant: 'destructive',
           title: 'Error Deleting Blog',
@@ -114,6 +115,13 @@ export default function UserDashboard() {
       }
     }
   };
+  
+
+  const handleEdit = (postId: string) => {
+    router.push(`/dashboard/edit-blog/${postId}`);
+  };
+
+ 
 
   useEffect(() => {
     fetchUser();
@@ -148,7 +156,7 @@ export default function UserDashboard() {
       <main className="container mx-auto px-4 py-6">
         <div className="flex flex-col sm:flex-row justify-between items-center  border-gray-800 pb-6 mt-24 mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-0">Welcome, {user.name}</h2>
-          <Button 
+          <Button
             onClick={() => router.push('/dashboard/add-blog')}
             className="bg-white text-black hover:bg-gray-200 transition-colors"
           >
@@ -195,9 +203,9 @@ export default function UserDashboard() {
                   </DropdownMenu>
                 </CardHeader>
                 <CardContent>
-                  <div 
-                    className="text-gray-300 line-clamp-3 text-sm" 
-                    dangerouslySetInnerHTML={{ __html: post.content }} 
+                  <div
+                    className="text-gray-300 line-clamp-3 text-sm"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
                   />
                 </CardContent>
                 <CardFooter>

@@ -7,15 +7,20 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardFooter,
+
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+
+type LoginForm = {
+  email: string;
+  password: string;
+}
 
 export default function Login() {
   const { toast } = useToast();
@@ -23,7 +28,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const login = async (formData: any) => {
+  const login = async (formData:LoginForm) => {
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/login`,
@@ -67,7 +72,7 @@ export default function Login() {
               Login to your account
             </CardTitle>
             <div className="flex justify-center items-center mt-2">
-              <span className="text-lg text-gray-400">Don't have an account?</span>
+              <span className="text-lg text-gray-400">Don&apost have an account?</span>
               <Link href="/sign-up" className="ml-1 text-yellow-400 hover:underline">
                 Sign Up
               </Link>

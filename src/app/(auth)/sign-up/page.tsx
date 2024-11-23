@@ -4,12 +4,22 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
+
+type RegisterFormData = {
+  name: string;
+  email: string;
+  password: string;
+};
+interface AxiosErrorResponse {
+  message?: string;
+}
+
 
 export default function Register() {
   const { toast } = useToast();
@@ -19,7 +29,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const register = async (formData: any) => {
+  const register = async (formData: RegisterFormData) => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/signup`,
@@ -32,8 +42,10 @@ export default function Register() {
         duration: 3000,
       });
       router.push('/dashboard');
-    } catch (error:any) {
-      const errorMessage = error.response?.data?.message || 'An error occurred during registration.';
+    } catch (error:unknown) {
+      const axiosError = error as AxiosError<AxiosErrorResponse>;
+      const errorMessage =
+        axiosError.response?.data?.message || 'An error occurred during Regitration.';
       console.error('Registration Error:', errorMessage);
       toast({
         variant: 'destructive',
@@ -43,6 +55,7 @@ export default function Register() {
       });
     }
   };
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

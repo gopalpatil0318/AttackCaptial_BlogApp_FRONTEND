@@ -31,7 +31,7 @@ export default function Footer() {
                 </label>
               </div>
               <p className="text-xs">
-                By clicking "Subscribe", you agree to our
+                By clicking &quot;Subscribe&quot;, you agree to our
                 <Link href="#" className="underline text-indigo-500 hover:text-indigo-400">
                   Terms of Service
                 </Link>
